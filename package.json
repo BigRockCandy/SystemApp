@@ -1,0 +1,28 @@
+{
+  "name": "systemapp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "fix": "eslint . --fix"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BigRockCandy/SystemApp.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/BigRockCandy/SystemApp/issues"
+  },
+  "homepage": "https://github.com/BigRockCandy/SystemApp#readme",
+  "dependencies": {
+    "vuex": "^4.0.2"
+  },
+  "devDependencies": {
+    "eslint": "^8.2.0",
+    "eslint-config-airbnb": "^19.0.0",
+    "jsencrypt": "^3.0.0-rc.1"
+  }
+}
