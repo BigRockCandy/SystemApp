@@ -18,10 +18,12 @@
 			"style": {
 				"navigationBarTitleText": "主页面",
 				// 禁止下拉刷新，非查询页面加上此配置
-				"enablePullDownRefresh": false
+				"enablePullDownRefresh": false,
+				"navigationBarTextStyle":"white",
+				"navigationBarBackgroundColor":"#3C9CFF"
 			}
-		}
-	    ,{
+		},
+	    {
             "path" : "pages/system/test",
             "style" :                                                                                    
             {

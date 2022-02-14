@@ -3,18 +3,19 @@
 		<view class="u-page__item">
 			<view class="">
 				<view v-show="currentTab===index" v-for="(item,index) in phonetab" :key="index">
-				  {{item.name}}组件预留位置
+				  <!-- {{item.name}}组件预留位置 --> 
+				  <grid :baseList="baseList"></grid>
 				</view>
 			</view>
 			
-			<u-gap height="150"></u-gap>
+			<!-- <u-gap height="150"></u-gap> -->
 			<u-tabbar :value="currentTab" @change="name => currentTab = name" :fixed="true" :placeholder="true"
 				:safeAreaInsetBottom="true">
-				<u-tabbar-item :text="item.name" v-for="(item,index) in phonetab" :key="index" @click="currentTab=index">
+				<u-tabbar-item :text="item.name" v-for="(item,index) in phonetab" :key="index" @click="changeTab(item,index)">
 					<image class="u-page__item__slot-icon" slot="active-icon"
-						:src="'../../static/image/'+item.name+'选中.png'"></image>
+						:src="'../../static/image/'+item.link+'-selected.png'"></image>
 					<image class="u-page__item__slot-icon" slot="inactive-icon"
-						:src="'../../static/image/'+item.name+'未选中.png'"></image>
+						:src="'../../static/image/'+item.link+'.png'"></image>
 				</u-tabbar-item>
 			</u-tabbar>
 		</view>
@@ -25,17 +26,27 @@
 	import {
 		mapGetters
 	} from 'vuex'
+	import Grid from '../../components/Grid.vue'
 	export default {
 		data() {
 			return {
-				currentTab: 0
+				currentTab: 0,
+				baseList:[]
 			}
+		},
+		components:{
+			Grid
 		},
 		onLoad() {
 			console.log('进入主页面', this.user, this.phonetab)
-
+			this.baseList=this.phonetab?this.phonetab[0].children:[]
 		},
 		methods: {
+			changeTab(item,index){
+				this.currentTab=index
+				this.baseList=item.children
+				console.log('baseList',this.baseList)
+			},
 			gotoPage(item) {
 				console.log('item', item)
 				uni.navigateTo({

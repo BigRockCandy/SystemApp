@@ -1,6 +1,6 @@
 import Vue from 'vue'
 import App from './App'
-
+import Vuex from 'vuex'
 // vuex
 import store from './store/store'
 
@@ -8,7 +8,7 @@ import store from './store/store'
 import uView from '@/uni_modules/uview-ui'
 
 import mixin from './config/mixin'
-
+Vue.use(Vuex)
 Vue.prototype.$store = store
 
 Vue.config.productionTip = false

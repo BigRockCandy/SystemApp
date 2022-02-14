@@ -2,13 +2,12 @@
 	export default {
 		onLaunch: function() {
 			console.log('App启动')
+			plus.navigator.setFullscreen(true)
+			plus.navigator.hideSystemNavigation()
 		},
 		onShow: function() {
 			console.log('App前台')
 		},
-		onHide: function() {
-			console.log('App后台')
-		}
 	}
 </script>
 

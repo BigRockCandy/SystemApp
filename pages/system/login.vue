@@ -27,7 +27,7 @@
 	</view>
 </template>
 <script>
-	import JSEncrypt from 'jsencrypt'
+	import JSEncrypt from '../../util/jsencrypt.js'
 	import {
 		mapMutations
 	} from 'vuex'
@@ -80,6 +80,7 @@
 						icon: 'none'
 					})
 					console.log('99999999999999')
+					console.log(this.$store)
 					this.setLoginUser(res.data)
 					this.disabled = false
 					uni.navigateTo({
