@@ -24,7 +24,7 @@ const app = new Vue({
     ...App
 })
 
-// 引入请求封装
+// 请求拦截
 require('./util/request/index')(app)
 
 app.$mount()

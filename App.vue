@@ -7,6 +7,8 @@
 		},
 		onShow: function() {
 			console.log('App前台')
+			plus.navigator.setFullscreen(true)
+			plus.navigator.hideSystemNavigation()
 		},
 	}
 </script>
