@@ -31,6 +31,7 @@
 	import {
 		mapMutations
 	} from 'vuex'
+	import {userLogin} from '../../util/api'
 	export default {
 		data() {
 			return {
@@ -71,7 +72,7 @@
 				data = encrypt.encrypt(JSON.stringify(data))
 				console.log(data)
 				this.disabled = true
-				uni.$u.http.post('/rs/user/userLogin/手机服务', data).then(res => {
+				userLogin(data).then(res => {
 					console.log('获取登陆信息：' + JSON.stringify(res.data))
 					console.log('当前登录人员：' + res.data.name)
 					uni.showToast({
