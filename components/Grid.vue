@@ -5,7 +5,7 @@
 				:key="baseListIndex" style="margin-top: 30rpx;">
 				<view style="border-radius: 30rpx;border: 1px solid #eee;margin: auto;display: flex;flex-direction: column;justify-content: space-between;padding-left: 100rpx;padding-right:100rpx;">
 					<image src="../static/image/weixiudaiban.png" style="height: 66rpx;width: 66rpx;margin:auto;padding-top: 30rpx;"></image>
-					<text class="grid-text" style="line-height: 50rpx;text-align: center;">{{baseListItem.name}}</text>
+					<text class="grid-text" style="line-height: 50rpx;text-align: center;">{{baseListItem.name}}</text> 
 				</view>
 			</u-grid-item>
 		</u-grid>
