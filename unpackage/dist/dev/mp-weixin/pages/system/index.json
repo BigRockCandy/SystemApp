@@ -1,0 +1,9 @@
+{
+  "navigationBarTitleText": "主页面",
+  "enablePullDownRefresh": false,
+  "usingComponents": {
+    "u-tabbar": "/uni_modules/uview-ui/components/u-tabbar/u-tabbar",
+    "u-tabbar-item": "/uni_modules/uview-ui/components/u-tabbar-item/u-tabbar-item",
+    "grid": "/components/Grid"
+  }
+}

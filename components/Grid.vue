@@ -1,9 +1,12 @@
 <template>
 	<view>
 		<u-grid :border="false" @click="click" col="2">
-			<u-grid-item v-for="(baseListItem,baseListIndex) in baseList" :key="baseListIndex" style="margin-top: 70rpx;">
-				<image src="../static/image/weixiudaiban.png" style="height: 132rpx;width: 132rpx;"></image>
-				<text class="grid-text" style="line-height: 50rpx;">{{baseListItem.name}}</text>
+			<u-grid-item  v-for="(baseListItem,baseListIndex) in baseList"
+				:key="baseListIndex" style="margin-top: 50rpx;">
+				<view style="border-radius: 10%;border: 1px solid #eee;margin: auto;display: flex;flex-direction: column;justify-content: space-between;padding-left: 100rpx;padding-right:100rpx;">
+					<image src="../static/image/weixiudaiban.png" style="height: 132rpx;width: 132rpx;margin-top: 30rpx;"></image>
+					<text class="grid-text" style="line-height: 50rpx;text-align: center;">{{baseListItem.name}}</text>
+				</view>
 			</u-grid-item>
 		</u-grid>
 		<u-toast ref="uToast" />
@@ -13,13 +16,12 @@
 <script>
 	export default {
 		data() {
-			return {
-			}
+			return {}
 		},
-		props:{
-			baseList:{
-				type:Array,
-				required:true
+		props: {
+			baseList: {
+				type: Array,
+				required: true
 			}
 		},
 		methods: {

@@ -1,0 +1,15 @@
+{
+  "pages": [
+    "pages/system/login",
+    "pages/system/index",
+    "pages/system/test"
+  ],
+  "subPackages": [],
+  "window": {
+    "navigationBarTextStyle": "black",
+    "navigationBarTitleText": "智能燃气终端",
+    "navigationBarBackgroundColor": "#F8F8F8",
+    "backgroundColor": "#F8F8F8"
+  },
+  "usingComponents": {}
+}
