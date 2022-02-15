@@ -78,12 +78,12 @@
 			}
 
 			&__slot-icon {
-				width: 60rpx;
-				height: 60rpx;
+				width: 40rpx;
+				height: 40rpx;
 			}
 		}
 	}
 	.u-page /deep/ .u-tabbar__content__item-wrapper{
-		height: 140rpx;
+		height: 120rpx;
 	}
 </style>
