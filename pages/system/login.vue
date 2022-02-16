@@ -24,6 +24,10 @@
 				</view>
 			</view>
 		</view>
+		<u-loading-page :loading="disabled" bgColor="rgba(0, 0, 0, 0.5)" loadingMode="spinner" loading-text="正在登陆">
+		</u-loading-page>
+		<u-loading-page :loading="initSqllite"  loading-text="正在初始化,请耐心等待">
+		</u-loading-page>
 	</view>
 </template>
 <script>
@@ -31,16 +35,42 @@
 	import {
 		mapMutations
 	} from 'vuex'
-	import {userLogin} from '../../util/api'
+	import {
+		userLogin
+	} from '../../util/api'
 	export default {
 		data() {
 			return {
 				ename: '', //账号
 				password: '', //密码
-				disabled: false
+				disabled: false,
+				initSqllite:false
 			};
 		},
-		onLoad() {},
+		async onLoad() {
+			//判断是否是首次进入app，首次进入需要对sqllite进行初始化
+			try {
+				const value = uni.getStorageSync('initLogin')
+				if (value) {
+					console.log('非首次进入，无须初始化，直接开始加载登陆页')
+
+				} else {
+					console.log('首次进入，开始初始化sqlite')
+					this.initSqllite=true
+					/*
+					sqllite初始化方法
+					*/
+				    await this.initSqlite()
+					this.initSqllite=false
+					console.log('初始化sqlite完成')
+					uni.setStorageSync('initLogin', true);
+				}
+			} catch (e) {
+				// error
+				console.log('初始化异常', e)
+			}
+
+		},
 		methods: {
 			...mapMutations(['setLoginUser']),
 			//当前登录按钮操作
@@ -84,7 +114,7 @@
 					this.setLoginUser(res.data)
 					this.disabled = false
 					uni.navigateTo({
-						url:'./index'
+						url: './index'
 					})
 				}).catch(err => {
 					uni.showToast({
@@ -96,6 +126,11 @@
 				})
 
 			},
+			async initSqlite(){
+				// setTimeout(()=>{
+				// 	console.log('6666666666')
+				// },5000)
+			}
 		}
 	}
 </script>
