@@ -105,10 +105,10 @@
 				userLogin(data).then(res => {
 					console.log('获取登陆信息：' + JSON.stringify(res.data))
 					console.log('当前登录人员：' + res.data.name)
-					uni.showToast({
-						title: '登录成功！',
-						icon: 'none'
-					})
+					// uni.showToast({
+					// 	title: '登录成功！',
+					// 	icon: 'none'
+					// })
 					console.log('99999999999999')
 					console.log(this.$store)
 					this.setLoginUser(res.data)
@@ -119,7 +119,8 @@
 				}).catch(err => {
 					uni.showToast({
 						title: '登陆失败,请检查账号密码是否有误,如多次失败请联系管理员核对账号密码！',
-						icon: 'none'
+						icon: 'none',
+						duration:4000
 					})
 					this.disabled = false
 					return
