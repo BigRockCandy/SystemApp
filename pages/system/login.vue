@@ -33,6 +33,10 @@
 <script>
 	import JSEncrypt from '../../util/jsencrypt.js'
 	import {
+		openSqlite,
+		executeSql
+	} from "@/util/database";
+	import {
 		mapMutations
 	} from 'vuex'
 	import {
@@ -50,12 +54,13 @@
 		},
 		async onLoad() {
 			//判断是否是首次进入app，首次进入需要对sqllite进行初始化
+			
 			try {
 				const value = uni.getStorageSync('initLogin')
 				if (value) {
 					console.log('非首次进入，无须初始化，直接开始加载登陆页')
-					console.log('t_serviceworkorder',JSON.stringify(uni.getStorageSync('t_serviceworkorder')))
-
+					const sql='select * from t_serviceworkorder'
+					console.log('res',JSON.stringify(executeSql(sql)))
 				} else {
 					console.log('首次进入，开始初始化sqlite')
 					this.initSqllite = true
@@ -129,6 +134,41 @@
 				})
 
 			},
+			async openSqlite() {
+				// 打开数据库
+				try {
+					let b = await openSqlite()
+					console.log("打开数据库成功")
+					const t_serviceworkorder = uni.getStorageSync('t_serviceworkorder')
+					const columns = t_serviceworkorder.columns
+					const idName = t_serviceworkorder.idName
+					let idColName = t_serviceworkorder.idColName
+					const idType = t_serviceworkorder.idType
+					const idGenerator = t_serviceworkorder.idGenerator
+					const tableName = t_serviceworkorder.tableName
+					let sql = ' CREATE TABLE ' + tableName + " ("
+					for (const col in columns) {
+						console.log('col', columns[col].indexOf('STRING') !== -1)
+						sql += ' ' + col
+						if (columns[col].indexOf('NUMBER') !== -1) {
+							sql += ' INTEGER'
+						} else {
+							sql += ' TEXT'
+						}
+					}
+					console.log('idColName', idColName)
+					idColName += ' ' + idType === 'NUMBER' ? ' INTEGER' : ' TEXT'
+					console.log('idColName', idColName)
+					sql += ' ' + idColName
+					console.log('sql', sql)
+					sql += ' ' + (idGenerator !== 'ID_AUTO' && idGenerator !== 'ID_SEQ') ? "" : "AUTOINCREMENT"
+					sql += ' )'
+
+					executeSql(sql)
+				} catch (e) {
+					console.error("打开数据库，报错", e)
+				}
+			},
 			async initSqlite() {
 				// setTimeout(()=>{
 				// 	console.log('6666666666')
@@ -139,6 +179,7 @@
 					console.log('table', table)
 					uni.setStorageSync(table, tables[table])
 				}
+				await this.openSqlite()
 
 			}
 		}
