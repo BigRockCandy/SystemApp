@@ -71,10 +71,11 @@ export function executeSql(sql){
             //表格创建或者打开，后面为表格结构
             sql:sql,
             success(e){
+				console.log('executeSql',JSON.stringify(e))
                 resolve(e);
             },
             fail(e){
-                console.error("自定义sql报错",e)
+                console.error("executeSql报错",e)
                 reject(e);
             }
         })
@@ -273,10 +274,11 @@ export const selectSql = (sql) => {
             name: name,
             sql: sql,
             success(e) {
+				console.log('selectSql',JSON.stringify(e))
                 resolve(e);
             },
             fail(e) {
-                console.log("查询报错",e)
+                console.log("selectSql查询报错",e)
                 reject(e);
             }
         })

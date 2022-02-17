@@ -34,7 +34,9 @@
 	import JSEncrypt from '../../util/jsencrypt.js'
 	import {
 		openSqlite,
-		executeSql
+		executeSql,
+		getTable,
+		selectSql
 	} from "@/util/database";
 	import {
 		mapMutations
@@ -60,7 +62,8 @@
 				if (value) {
 					console.log('非首次进入，无须初始化，直接开始加载登陆页')
 					const sql='select * from t_serviceworkorder'
-					console.log('res',JSON.stringify(executeSql(sql)))
+					console.log('res',selectSql(sql))
+					console.log('res',JSON.stringify(getTable()))
 				} else {
 					console.log('首次进入，开始初始化sqlite')
 					this.initSqllite = true
