@@ -26,7 +26,7 @@
 		</view>
 		<u-loading-page :loading="disabled" bgColor="rgba(0, 0, 0, 0.5)" loadingMode="spinner" loading-text="正在登陆">
 		</u-loading-page>
-		<u-loading-page :loading="initSqllite"  loading-text="正在初始化,请耐心等待">
+		<u-loading-page :loading="initSqllite" loading-text="正在初始化,请耐心等待">
 		</u-loading-page>
 	</view>
 </template>
@@ -36,7 +36,8 @@
 		mapMutations
 	} from 'vuex'
 	import {
-		userLogin
+		userLogin,
+		getDBConfig
 	} from '../../util/api'
 	export default {
 		data() {
@@ -44,7 +45,7 @@
 				ename: '', //账号
 				password: '', //密码
 				disabled: false,
-				initSqllite:false
+				initSqllite: false
 			};
 		},
 		async onLoad() {
@@ -53,15 +54,16 @@
 				const value = uni.getStorageSync('initLogin')
 				if (value) {
 					console.log('非首次进入，无须初始化，直接开始加载登陆页')
+					console.log('t_serviceworkorder',JSON.stringify(uni.getStorageSync('t_serviceworkorder')))
 
 				} else {
 					console.log('首次进入，开始初始化sqlite')
-					this.initSqllite=true
+					this.initSqllite = true
 					/*
 					sqllite初始化方法
 					*/
-				    await this.initSqlite()
-					this.initSqllite=false
+					await this.initSqlite()
+					this.initSqllite = false
 					console.log('初始化sqlite完成')
 					uni.setStorageSync('initLogin', true);
 				}
@@ -120,17 +122,24 @@
 					uni.showToast({
 						title: '登陆失败,请检查账号密码是否有误,如多次失败请联系管理员核对账号密码！',
 						icon: 'none',
-						duration:4000
+						duration: 4000
 					})
 					this.disabled = false
 					return
 				})
 
 			},
-			async initSqlite(){
+			async initSqlite() {
 				// setTimeout(()=>{
 				// 	console.log('6666666666')
 				// },5000)
+				let res = await getDBConfig({})
+				const tables = res.data
+				for (let table in tables) {
+					console.log('table', table)
+					uni.setStorageSync(table, tables[table])
+				}
+
 			}
 		}
 	}
