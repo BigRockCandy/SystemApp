@@ -71,7 +71,7 @@ export function executeSql(sql){
             //表格创建或者打开，后面为表格结构
             sql:sql,
             success(e){
-				console.log('executeSql',JSON.stringify(e))
+				// console.log('executeSql',JSON.stringify(e))
                 resolve(e);
             },
             fail(e){
@@ -83,7 +83,7 @@ export function executeSql(sql){
 }
 // 查询所有数据表名
 export async function getTable(){
-    return selectSql("select * FROM sqlite_master where type='table'")
+    return selectSql("select name FROM sqlite_master where type='table'")
 }
 // 获取表的所有字段
 export async function getAllField(tableName){

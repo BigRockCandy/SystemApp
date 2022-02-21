@@ -36,15 +36,21 @@
 		openSqlite,
 		executeSql,
 		getTable,
-		selectSql
+		selectSql,
+		closedb,
+		isTable
 	} from "@/util/database";
 	import {
+		mapState,
 		mapMutations
 	} from 'vuex'
 	import {
 		userLogin,
-		getDBConfig
+		getDBConfig,
+		appVersion,
+		vueConfig
 	} from '../../util/api'
+	import appConfig from '../../config/config.js'
 	export default {
 		data() {
 			return {
@@ -56,14 +62,18 @@
 		},
 		async onLoad() {
 			//判断是否是首次进入app，首次进入需要对sqllite进行初始化
-			
+
 			try {
 				const value = uni.getStorageSync('initLogin')
 				if (value) {
-					console.log('非首次进入，无须初始化，直接开始加载登陆页')
-					const sql='select * from t_serviceworkorder'
-					console.log('res',selectSql(sql))
-					console.log('res',JSON.stringify(getTable()))
+					console.log('非首次进入,进行版本对比')
+					const result = await appVersion()
+					console.log(JSON.stringify(result))
+					if (appConfig.appVersion < result.data.appVer) {
+						console.log('更新sqlite')
+					} else {
+						console.log('版本相同不进行任何操作')
+					}
 				} else {
 					console.log('首次进入，开始初始化sqlite')
 					this.initSqllite = true
@@ -76,14 +86,12 @@
 					uni.setStorageSync('initLogin', true);
 				}
 			} catch (e) {
-				// error
 				console.log('初始化异常', e)
 			}
 
 		},
 		methods: {
-			...mapMutations(['setLoginUser']),
-			//当前登录按钮操作
+			...mapMutations(['setLoginUser', 'setToken', 'setConfig']),
 			login(e) {
 				var that = this;
 				if (!that.ename) {
@@ -114,18 +122,19 @@
 				this.disabled = true
 				userLogin(data).then(res => {
 					console.log('获取登陆信息：' + JSON.stringify(res.data))
-					console.log('当前登录人员：' + res.data.name)
-					// uni.showToast({
-					// 	title: '登录成功！',
-					// 	icon: 'none'
-					// })
-					console.log('99999999999999')
-					console.log(this.$store)
 					this.setLoginUser(res.data)
-					this.disabled = false
-					uni.navigateTo({
-						url: './index'
+					this.setToken(res.data.id)
+					vueConfig().then(result => {
+						console.log('配置文件信息', JSON.stringify(result.data))
+						this.setConfig(result.data)
+						this.disabled = false
+						uni.navigateTo({
+							url: './index'
+						})
+					}).catch(err => {
+						console.log('获取配置文件失败', err)
 					})
+
 				}).catch(err => {
 					uni.showToast({
 						title: '登陆失败,请检查账号密码是否有误,如多次失败请联系管理员核对账号密码！',
@@ -137,21 +146,21 @@
 				})
 
 			},
-			async openSqlite() {
-				// 打开数据库
+			async createTable(createTableName) {
 				try {
-					let b = await openSqlite()
-					console.log("打开数据库成功")
-					const t_serviceworkorder = uni.getStorageSync('t_serviceworkorder')
-					const columns = t_serviceworkorder.columns
-					const idName = t_serviceworkorder.idName
-					let idColName = t_serviceworkorder.idColName
-					const idType = t_serviceworkorder.idType
-					const idGenerator = t_serviceworkorder.idGenerator
-					const tableName = t_serviceworkorder.tableName
-					let sql = ' CREATE TABLE ' + tableName + " ("
+					const tabel = uni.getStorageSync(createTableName)
+					if (!tabel) {
+						console.log('表结构不存在', createTableName)
+						return
+					}
+					const columns = tabel.columns
+					const idName = tabel.idName
+					let idColName = tabel.idColName
+					const idType = tabel.idType
+					const idGenerator = tabel.idGenerator
+					const tableName = tabel.tableName
+					let sql = ' CREATE TABLE IF NOT EXISTS ' + tableName + " ("
 					for (const col in columns) {
-						console.log('col', columns[col].indexOf('STRING') !== -1)
 						sql += ' ' + col
 						if (columns[col].indexOf('NUMBER') !== -1) {
 							sql += ' INTEGER'
@@ -159,32 +168,45 @@
 							sql += ' TEXT'
 						}
 					}
-					console.log('idColName', idColName)
 					idColName += ' ' + idType === 'NUMBER' ? ' INTEGER' : ' TEXT'
-					console.log('idColName', idColName)
 					sql += ' ' + idColName
-					console.log('sql', sql)
 					sql += ' ' + (idGenerator !== 'ID_AUTO' && idGenerator !== 'ID_SEQ') ? "" : "AUTOINCREMENT"
 					sql += ' )'
-
-					executeSql(sql)
+					if (createTableName === 't_oppointment')
+						console.log('生成的sql', sql)
+					await executeSql(sql)
+					console.log('创建成功', createTableName)
+				} catch (e) {
+					console.error("创建表出错", e)
+				}
+			},
+			async openInitSqlite() {
+				// 打开数据库
+				try {
+					await openSqlite()
+					let entities = appConfig.entities
+					for (let i = 0; i < entities.length; i++) {
+						await this.createTable(entities[i])
+					}
+					const tables = await getTable()
+					console.log('tables', JSON.stringify(tables))
+					await closedb()
 				} catch (e) {
 					console.error("打开数据库，报错", e)
 				}
 			},
 			async initSqlite() {
-				// setTimeout(()=>{
-				// 	console.log('6666666666')
-				// },5000)
 				let res = await getDBConfig({})
 				const tables = res.data
 				for (let table in tables) {
-					console.log('table', table)
 					uni.setStorageSync(table, tables[table])
 				}
-				await this.openSqlite()
+				await this.openInitSqlite()
 
 			}
+		},
+		computed: {
+			...mapState(['token'])
 		}
 	}
 </script>

@@ -1,7 +1,7 @@
 export default {
-	user(state) {
-		return state.user
-	},
+	// user(state) {
+	// 	return state.user
+	// },
 	phonetab(state) {
 		return state.user.functions
 	}
