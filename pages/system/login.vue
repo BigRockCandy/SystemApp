@@ -38,7 +38,8 @@
 		getTable,
 		selectSql,
 		closedb,
-		isTable
+		isTable,
+		getAllField
 	} from "@/util/database";
 	import {
 		mapState,
@@ -68,9 +69,14 @@
 				if (value) {
 					console.log('非首次进入,进行版本对比')
 					const result = await appVersion()
-					console.log(JSON.stringify(result))
+					console.log('服务器app版本', appConfig.appVersion)
 					if (appConfig.appVersion < result.data.appVer) {
+						await openSqlite()
 						console.log('更新sqlite')
+						for (let i = 0; i < appConfig.entities.length; i++) {
+							await this.updateTable(appConfig.entities[i])
+						}
+						await closedb()
 					} else {
 						console.log('版本相同不进行任何操作')
 					}
@@ -146,26 +152,62 @@
 				})
 
 			},
-			async createTable(createTableName) {
-				try {
-					const tabel = uni.getStorageSync(createTableName)
-					if (!tabel) {
-						console.log('表结构不存在', createTableName)
-						return
+			async updateTable(tablename) {
+
+				const cols = await getAllField(tablename)
+				const table = uni.getStorageSync(tablename)
+				const columns = table.columns
+				const idColName = table.idColName
+				console.log('columns', JSON.stringify(columns))
+				for (let i = 0; i < cols.length; i++) {
+					if (!columns.hasOwnProperty(cols[i].name)) {
+						if (!(cols[i].name === idColName)) {
+							if (columns[cols[i].name].indexOf('NUMBER') !== -1) {
+								const sql = 'ALTER TABLE ' + tablename + ' ADD ' + cols[i].name + ' INTEGER'
+								await executeSql(sql)
+							} else {
+								const sql = 'ALTER TABLE ' + tablename + ' ADD ' + cols[i].name + ' TEXT'
+								await executeSql(sql)
+							}
+						}
 					}
-					const columns = tabel.columns
-					const idName = tabel.idName
-					let idColName = tabel.idColName
-					const idType = tabel.idType
-					const idGenerator = tabel.idGenerator
-					const tableName = tabel.tableName
+				}
+				// for (const col in columns) {
+				// 	console.log(col)
+				// 	// if (cols[0].type.indexOf(col) === -1) {
+				// 	// 	console.log('更新字段',col)
+				// 	// 	if (columns[col].indexOf('NUMBER') !== -1) {
+				// 	// 		const sql='ALTER TABLE '+tablename+' ADD '+columns[col]+' INTEGER'
+				// 	// 	} else {
+				// 	// 		const sql='ALTER TABLE '+tablename+' ADD f_orderstatus TEXT'
+				// 	// 	}
+				// 	// }
+
+				// }
+			},
+			async createTable(createTableName) {
+
+				const table = uni.getStorageSync(createTableName)
+				if (!table) {
+					console.error('表结构不存在', createTableName)
+					// const err = new Error('表结构不存在' + createTableName)
+					// console.error('表结构不存在', err)
+					return
+				}
+				try {
+					const columns = table.columns
+					const idName = table.idName
+					let idColName = table.idColName
+					const idType = table.idType
+					const idGenerator = table.idGenerator
+					const tableName = table.tableName
 					let sql = ' CREATE TABLE IF NOT EXISTS ' + tableName + " ("
 					for (const col in columns) {
 						sql += ' ' + col
 						if (columns[col].indexOf('NUMBER') !== -1) {
-							sql += ' INTEGER'
+							sql += ' INTEGER,'
 						} else {
-							sql += ' TEXT'
+							sql += ' TEXT,'
 						}
 					}
 					idColName += ' ' + idType === 'NUMBER' ? ' INTEGER' : ' TEXT'

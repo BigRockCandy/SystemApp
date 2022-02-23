@@ -87,7 +87,7 @@ export async function getTable(){
 }
 // 获取表的所有字段
 export async function getAllField(tableName){
-    return selectSql(`PRAGMA table_info([${tableName}])`)
+    return selectSql(`PRAGMA table_info(${tableName})`)
 }
 
 // 查询表数据总条数
