@@ -33,13 +33,8 @@
 <script>
 	import JSEncrypt from '../../util/jsencrypt.js'
 	import {
-		openSqlite,
-		executeSql,
-		getTable,
-		selectSql,
-		closedb,
-		isTable,
-		getAllField
+		updateInitTable,
+		initSqlite
 	} from "@/util/database";
 	import {
 		mapState,
@@ -47,7 +42,6 @@
 	} from 'vuex'
 	import {
 		userLogin,
-		getDBConfig,
 		appVersion,
 		vueConfig
 	} from '../../util/api'
@@ -63,30 +57,21 @@
 		},
 		async onLoad() {
 			//判断是否是首次进入app，首次进入需要对sqllite进行初始化
-
 			try {
 				const value = uni.getStorageSync('initLogin')
 				if (value) {
 					console.log('非首次进入,进行版本对比')
 					const result = await appVersion()
-					console.log('服务器app版本', appConfig.appVersion)
+					console.log('服务器app版本', result.data.appVer)
 					if (appConfig.appVersion < result.data.appVer) {
-						await openSqlite()
-						console.log('更新sqlite')
-						for (let i = 0; i < appConfig.entities.length; i++) {
-							await this.updateTable(appConfig.entities[i])
-						}
-						await closedb()
+						await updateInitTable()
 					} else {
 						console.log('版本相同不进行任何操作')
 					}
 				} else {
 					console.log('首次进入，开始初始化sqlite')
 					this.initSqllite = true
-					/*
-					sqllite初始化方法
-					*/
-					await this.initSqlite()
+					await initSqlite()
 					this.initSqllite = false
 					console.log('初始化sqlite完成')
 					uni.setStorageSync('initLogin', true);
@@ -150,100 +135,6 @@
 					this.disabled = false
 					return
 				})
-
-			},
-			async updateTable(tablename) {
-
-				const cols = await getAllField(tablename)
-				const table = uni.getStorageSync(tablename)
-				const columns = table.columns
-				const idColName = table.idColName
-				console.log('columns', JSON.stringify(columns))
-				for (let i = 0; i < cols.length; i++) {
-					if (!columns.hasOwnProperty(cols[i].name)) {
-						if (!(cols[i].name === idColName)) {
-							if (columns[cols[i].name].indexOf('NUMBER') !== -1) {
-								const sql = 'ALTER TABLE ' + tablename + ' ADD ' + cols[i].name + ' INTEGER'
-								await executeSql(sql)
-							} else {
-								const sql = 'ALTER TABLE ' + tablename + ' ADD ' + cols[i].name + ' TEXT'
-								await executeSql(sql)
-							}
-						}
-					}
-				}
-				// for (const col in columns) {
-				// 	console.log(col)
-				// 	// if (cols[0].type.indexOf(col) === -1) {
-				// 	// 	console.log('更新字段',col)
-				// 	// 	if (columns[col].indexOf('NUMBER') !== -1) {
-				// 	// 		const sql='ALTER TABLE '+tablename+' ADD '+columns[col]+' INTEGER'
-				// 	// 	} else {
-				// 	// 		const sql='ALTER TABLE '+tablename+' ADD f_orderstatus TEXT'
-				// 	// 	}
-				// 	// }
-
-				// }
-			},
-			async createTable(createTableName) {
-
-				const table = uni.getStorageSync(createTableName)
-				if (!table) {
-					console.error('表结构不存在', createTableName)
-					// const err = new Error('表结构不存在' + createTableName)
-					// console.error('表结构不存在', err)
-					return
-				}
-				try {
-					const columns = table.columns
-					const idName = table.idName
-					let idColName = table.idColName
-					const idType = table.idType
-					const idGenerator = table.idGenerator
-					const tableName = table.tableName
-					let sql = ' CREATE TABLE IF NOT EXISTS ' + tableName + " ("
-					for (const col in columns) {
-						sql += ' ' + col
-						if (columns[col].indexOf('NUMBER') !== -1) {
-							sql += ' INTEGER,'
-						} else {
-							sql += ' TEXT,'
-						}
-					}
-					idColName += ' ' + idType === 'NUMBER' ? ' INTEGER' : ' TEXT'
-					sql += ' ' + idColName
-					sql += ' ' + (idGenerator !== 'ID_AUTO' && idGenerator !== 'ID_SEQ') ? "" : "AUTOINCREMENT"
-					sql += ' )'
-					if (createTableName === 't_oppointment')
-						console.log('生成的sql', sql)
-					await executeSql(sql)
-					console.log('创建成功', createTableName)
-				} catch (e) {
-					console.error("创建表出错", e)
-				}
-			},
-			async openInitSqlite() {
-				// 打开数据库
-				try {
-					await openSqlite()
-					let entities = appConfig.entities
-					for (let i = 0; i < entities.length; i++) {
-						await this.createTable(entities[i])
-					}
-					const tables = await getTable()
-					console.log('tables', JSON.stringify(tables))
-					await closedb()
-				} catch (e) {
-					console.error("打开数据库，报错", e)
-				}
-			},
-			async initSqlite() {
-				let res = await getDBConfig({})
-				const tables = res.data
-				for (let table in tables) {
-					uni.setStorageSync(table, tables[table])
-				}
-				await this.openInitSqlite()
 
 			}
 		},

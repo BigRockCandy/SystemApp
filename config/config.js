@@ -1,6 +1,6 @@
 module.exports = {
-	baseUrl: 'http://183.67.41.139:8555',
-	appVersion: 1,
+	baseUrl: 'http://121.41.19.238:8555',
+	appVersion: 23,
 	entities: [
 		"t_serviceworkorder",
 		"t_service",
@@ -20,7 +20,6 @@ module.exports = {
 		"t_failure",
 		"t_failurecase",
 		"t_baseuserinfo",
-		"t_basemeterinfo",
 		"t_repairimg",
 		"t_detailimg",
 		"t_substitution",
@@ -42,13 +41,6 @@ module.exports = {
 		"t_phonehandplanimgs",
 		"t_apply",
 		"t_app_apply",
-		"t_inspection_devices_items",
-		"t_inspection_paper",
-		"t_inspection_devices",
-		"t_inspection_plan",
-		"t_inspection_plan_item",
-		"t_inspection_items_lists",
-		"t_inspection_imgs",
 		"t_phone_state"
 	]
 }
