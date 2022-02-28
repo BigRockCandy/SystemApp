@@ -125,7 +125,6 @@
 					}).catch(err => {
 						console.log('获取配置文件失败', err)
 					})
-
 				}).catch(err => {
 					uni.showToast({
 						title: '登陆失败,请检查账号密码是否有误,如多次失败请联系管理员核对账号密码！',

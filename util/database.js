@@ -5,7 +5,6 @@ import appConfig from '../config/config.js'
 
 //打开数据库(创建数据库或者有该数据库就打开)
 var name = "safecheck" // 数据库名称
-
 // 防止数据中的 单引号 报错
 export function html2Escape(str) {
 	// console.log("str",str,typeof str)

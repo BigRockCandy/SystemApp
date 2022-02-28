@@ -3,14 +3,14 @@ import App from './App'
 import Vuex from 'vuex'
 // vuex
 import store from './store/store'
-
+import * as appUtil from './util/util.js'
 // 引入全局uView 
 import uView from '@/uni_modules/uview-ui'
 
 import mixin from './config/mixin'
 Vue.use(Vuex)
 Vue.prototype.$store = store
-
+Vue.prototype.$appUtil = appUtil
 Vue.config.productionTip = false
 
 App.mpType = 'app'

@@ -9,3 +9,5 @@ export const getDBConfig = async (params, config = {}) => http.post('/phone/rs/d
 export const appVersion = async (config = {}) => http.get('/phone/rs/dir/version', config)
 
 export const vueConfig = async (config = {}) => http.get('/phone/rs/vue', config)
+
+export const safeTimeOut = async (params, config = {}) => http.post('/rs/logic/getCheckPlanChanged', params, config)

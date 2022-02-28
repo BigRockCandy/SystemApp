@@ -29,6 +29,9 @@
 		mapState
 	} from 'vuex'
 	import Grid from '../../components/Grid.vue'
+	import {
+		safeTimeOut
+	} from '../../util/api'
 	export default {
 		data() {
 			return {
@@ -42,6 +45,20 @@
 		onLoad() {
 			console.log('进入主页面', this.user, this.phonetab)
 			this.baseList = this.phonetab ? this.phonetab[0].children : []
+			console.log('aaaa', this.$appUtil.replaceMap("(t_check_plan_item:f_plan_id)"))
+			const testData = {
+				data: {
+					f_checker: 15130,
+					services: {
+						rows: []
+					}
+				}
+			}
+			safeTimeOut(testData).then(res => {
+				console.log('res', res)
+				console.log('t_check_paper', uni.getStorageSync('t_check_paper'))
+			})
+
 		},
 		methods: {
 			changeTab(item, index) {
