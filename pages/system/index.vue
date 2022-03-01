@@ -56,11 +56,52 @@
 			}
 			safeTimeOut(testData).then(res => {
 				console.log('res', res)
-				console.log('t_check_paper', uni.getStorageSync('t_check_paper'))
+				console.log("aaa")
+				const inserts = res.data.result.inserts
+				for (var i = 0; i < inserts.length; i++) {
+					this.entity('t_check_plan', inserts[i])
+				}
 			})
 
 		},
 		methods: {
+			entity(tableName, data) {
+				console.log(tableName, uni.getStorageSync(tableName))
+				const table = uni.getStorageSync(tableName)
+				if (!table) {
+					console.error('表结构不存在', tableName)
+					return
+				}
+				console.log(table.columns)
+				const columns = table.columns
+				const idName = table.idName
+				console.log(idName)
+				const idValue = data[idName]
+				console.log(idValue)
+				if (!idValue) {
+					this.doInsert(tableName, columns, data)
+				} else {
+					delete data[idName]
+					this.doInsert(tableName, columns, data)
+				}
+			},
+			doInsert(tableName, columns, data) {
+				let sql1 = 'insert into ' + tableName + '('
+				let sql2 = ') values('
+				for (let column in columns) {
+					if (data.hasOwnProperty(column)) {
+						sql1 += column + ','
+						if (data[column] === null || this.$appUtil.replaceMap(columns[column])[1] === 'NUMBER') {
+							sql2 += `${data[column]},`
+						} else {
+							sql2 += `'${data[column]}',`
+						}
+					}
+				}
+				sql1 = sql1.substring(0, sql1.lastIndexOf(','))
+				sql2 = sql2.substring(0, sql2.lastIndexOf(',')) + ')'
+				let sql = sql1 + sql2
+			},
 			changeTab(item, index) {
 				this.currentTab = index
 				this.baseList = item.children
