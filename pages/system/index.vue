@@ -32,6 +32,13 @@
 	import {
 		safeTimeOut
 	} from '../../util/api'
+	import {
+		addSql,
+		updateSql,
+		executeSql,
+		openSqlite,
+		selectSql
+	} from "@/util/database";
 	export default {
 		data() {
 			return {
@@ -65,7 +72,7 @@
 
 		},
 		methods: {
-			entity(tableName, data) {
+			async entity(tableName, data) {
 				console.log(tableName, uni.getStorageSync(tableName))
 				const table = uni.getStorageSync(tableName)
 				if (!table) {
@@ -75,17 +82,19 @@
 				console.log(table.columns)
 				const columns = table.columns
 				const idName = table.idName
+				const idType = table.idType
 				console.log(idName)
+				delete data[idName]
 				const idValue = data[idName]
 				console.log(idValue)
 				if (!idValue) {
-					this.doInsert(tableName, columns, data)
+					await this.doInsert(tableName, columns, data)
+					// await addSql(tableName,data)
 				} else {
-					delete data[idName]
-					this.doInsert(tableName, columns, data)
+					this.doUpdate(tableName, columns, data, idName, idType)
 				}
 			},
-			doInsert(tableName, columns, data) {
+			async doInsert(tableName, columns, data) {
 				let sql1 = 'insert into ' + tableName + '('
 				let sql2 = ') values('
 				for (let column in columns) {
@@ -101,6 +110,30 @@
 				sql1 = sql1.substring(0, sql1.lastIndexOf(','))
 				sql2 = sql2.substring(0, sql2.lastIndexOf(',')) + ')'
 				let sql = sql1 + sql2
+
+				console.log('生成的insert', sql)
+				const aa = await openSqlite()
+				console.log('aa', aa)
+				const bb = await executeSql(sql)
+				// const dd = await selectSql('select last_insert_rowid() from t_check_plan')
+				const dd = await selectSql('select * from t_check_plan')
+				console.log('dd', dd)
+			},
+			doUpdate(tableName, columns, data, idName, idType) {
+				let sql1 = 'update ' + tableName + ' set '
+				let sql2 = ` where ${idName}=${idType==='NUMBER'?data[idName]:"'"+data[idName]+"'"}`
+				for (let column in columns) {
+					if (data.hasOwnProperty(column)) {
+						if (data[column] === null || this.$appUtil.replaceMap(columns[column])[1] === 'NUMBER') {
+							sql1 += `${column}=${data[column]},`
+						} else {
+							sql1 += `${column}='${data[column]}',`
+						}
+					}
+				}
+				sql1 = sql1.substring(0, sql1.lastIndexOf(','))
+				let sql = sql1 + sql2
+				console.log('生成的update', sql)
 			},
 			changeTab(item, index) {
 				this.currentTab = index

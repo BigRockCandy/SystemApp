@@ -133,7 +133,6 @@ export const isTable = (tableName) => {
 
 // 添加数据
 export async function addSql(tableName, obj = {}) {
-
 	if (Object.keys(obj).length > 0) {
 		// 获取数据库的字段
 		let fieldList = await getAllField(tableName)
@@ -147,7 +146,7 @@ export async function addSql(tableName, obj = {}) {
 		valStr = valStr.substring(0, valStr.length - 1)
 		let sqlStr = `insert into ${tableName}(${keyStr}) values(${valStr})`
 		console.log("addSql", sqlStr)
-		return executeSql(sqlStr)
+	return executeSql(sqlStr)
 	} else {
 		return new Promise((resolve, reject) => {
 			reject("错误")
