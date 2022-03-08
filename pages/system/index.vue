@@ -37,7 +37,8 @@
 		updateSql,
 		executeSql,
 		openSqlite,
-		selectSql
+		selectSql,
+		closedb
 	} from "@/util/database";
 	export default {
 		data() {
@@ -79,45 +80,64 @@
 					console.error('表结构不存在', tableName)
 					return
 				}
-				console.log(table.columns)
+				console.log('99999999', table)
+				log.d('warn', '9999999999')
 				const columns = table.columns
 				const idName = table.idName
 				const idType = table.idType
+				const idGenerator = table.idGenerator
 				console.log(idName)
 				delete data[idName]
 				const idValue = data[idName]
 				console.log(idValue)
 				if (!idValue) {
-					await this.doInsert(tableName, columns, data)
+					await this.doInsert(tableName, columns, data, idGenerator, idName, idType)
 					// await addSql(tableName,data)
 				} else {
 					this.doUpdate(tableName, columns, data, idName, idType)
 				}
 			},
-			async doInsert(tableName, columns, data) {
-				let sql1 = 'insert into ' + tableName + '('
-				let sql2 = ') values('
-				for (let column in columns) {
-					if (data.hasOwnProperty(column)) {
-						sql1 += column + ','
-						if (data[column] === null || this.$appUtil.replaceMap(columns[column])[1] === 'NUMBER') {
-							sql2 += `${data[column]},`
-						} else {
-							sql2 += `'${data[column]}',`
+			async doInsert(tableName, columns, data, idGenerator, idName, idType) {
+				try {
+					let sql1 = 'insert into ' + tableName + '('
+					let sql2 = ') values('
+					let insertId
+					if (idGenerator === 'ID_GUID') {
+						insertId = this.$appUtil.uuid()
+						sql1 += idName + ','
+						sql2 += idType === 'NUMBER' ? insertId : "'" + insertId + "'" + ","
+					} else if (idGenerator === 'ID_SEQ') {
+
+					} else if (idGenerator === 'ID_ASSIGNED') {
+						insertId = this.$appUtil.uuid()
+						sql1 += idName + ','
+						sql2 += idType === 'NUMBER' ? insertId : "'" + insertId + "'" + ","
+					} else if (idGenerator === 'ID_FOREIGNER') {
+						insertId = this.$appUtil.uuid()
+						sql1 += idName + ','
+						sql2 += idType === 'NUMBER' ? insertId : "'" + insertId + "'" + ","
+					}
+					for (let column in columns) {
+						if (data.hasOwnProperty(column)) {
+							sql1 += column + ','
+							if (data[column] === null || this.$appUtil.replaceMap(columns[column])[1] === 'NUMBER') {
+								sql2 += `${data[column]},`
+							} else {
+								sql2 += `'${data[column]}',`
+							}
 						}
 					}
+					sql1 = sql1.substring(0, sql1.lastIndexOf(','))
+					sql2 = sql2.substring(0, sql2.lastIndexOf(',')) + ')'
+					var sql = sql1 + sql2
+					console.log('生成的insert', sql)
+					await executeSql(sql)
+					return insertId
+				} catch (e) {
+					//TODO handle the exception
+					console.log('插入表', tableName, '失败', e)
 				}
-				sql1 = sql1.substring(0, sql1.lastIndexOf(','))
-				sql2 = sql2.substring(0, sql2.lastIndexOf(',')) + ')'
-				let sql = sql1 + sql2
 
-				console.log('生成的insert', sql)
-				const aa = await openSqlite()
-				console.log('aa', aa)
-				const bb = await executeSql(sql)
-				// const dd = await selectSql('select last_insert_rowid() from t_check_plan')
-				const dd = await selectSql('select * from t_check_plan')
-				console.log('dd', dd)
 			},
 			doUpdate(tableName, columns, data, idName, idType) {
 				let sql1 = 'update ' + tableName + ' set '

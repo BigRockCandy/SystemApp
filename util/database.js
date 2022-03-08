@@ -78,13 +78,13 @@ export function closedb() {
 export function executeSql(sql) {
 	return new Promise((resolve, reject) => {
 		//创建表格在executeSql方法里写
-		// console.log("开始执行自定义sql",sql)
+		console.log("开始执行自定义sql",sql)
 		plus.sqlite.executeSql({
 			name,
 			//表格创建或者打开，后面为表格结构
 			sql: sql,
 			success(e) {
-				// console.log('executeSql',JSON.stringify(e))
+				 console.log('executeSql',JSON.stringify(e))
 				resolve(e);
 			},
 			fail(e) {
