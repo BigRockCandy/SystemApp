@@ -116,7 +116,6 @@
 					this.setLoginUser(res.data)
 					this.setToken(res.data.id)
 					vueConfig().then(result => {
-						console.log('配置文件信息', JSON.stringify(result.data))
 						this.setConfig(result.data)
 						this.disabled = false
 						uni.navigateTo({

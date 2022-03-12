@@ -80,6 +80,9 @@
                     }
                 }
             }
+        },
+        "uniStatistics" : {
+            "enable" : true
         }
     },
     /* 快应用特有相关 */

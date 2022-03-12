@@ -2,6 +2,7 @@ import {
 	getDBConfig
 } from './api.js'
 import appConfig from '../config/config.js'
+import * as appUtil from './util.js'
 
 //打开数据库(创建数据库或者有该数据库就打开)
 var name = "safecheck" // 数据库名称
@@ -78,13 +79,13 @@ export function closedb() {
 export function executeSql(sql) {
 	return new Promise((resolve, reject) => {
 		//创建表格在executeSql方法里写
-		console.log("开始执行自定义sql",sql)
+		// console.log("开始执行自定义sql", sql)
 		plus.sqlite.executeSql({
 			name,
 			//表格创建或者打开，后面为表格结构
 			sql: sql,
 			success(e) {
-				 console.log('executeSql',JSON.stringify(e))
+				// console.log('executeSql',JSON.stringify(e))
 				resolve(e);
 			},
 			fail(e) {
@@ -146,7 +147,7 @@ export async function addSql(tableName, obj = {}) {
 		valStr = valStr.substring(0, valStr.length - 1)
 		let sqlStr = `insert into ${tableName}(${keyStr}) values(${valStr})`
 		console.log("addSql", sqlStr)
-	return executeSql(sqlStr)
+		return executeSql(sqlStr)
 	} else {
 		return new Promise((resolve, reject) => {
 			reject("错误")
@@ -510,33 +511,44 @@ export function intersection(fieldList = [], obj) {
 
 	return keys
 }
+//更新表结构
 export async function updateTable(tablename) {
-	const cols = await getAllField(tablename)
-	const table = uni.getStorageSync(tablename)
-	const columns = table.columns ? JSON.parse(JSON.stringify(table.columns).replace(/\s+/g, "")) : table.columns
-	const idColName = table.idColName
-	for (let i = 0; i < cols.length; i++) {
-		if (!columns.hasOwnProperty(cols[i].name)) {
-			if (!(cols[i].name === idColName)) {
-				console.log('cols[i].name', cols[i].name)
-				if (columns[cols[i].name].indexOf('NUMBER') !== -1) {
-					const sql = 'ALTER TABLE ' + tablename + ' ADD ' + cols[i].name + ' INTEGER'
-					await executeSql(sql)
-				} else {
-					const sql = 'ALTER TABLE ' + tablename + ' ADD ' + cols[i].name + ' TEXT'
-					await executeSql(sql)
+	try {
+		const cols = await getAllField(tablename)
+		const table = uni.getStorageSync(tablename)
+		const columns = table.columns ? JSON.parse(JSON.stringify(table.columns).replace(/\s+/g, "")) : table
+			.columns
+		const idColName = table.idColName
+		for (let i = 0; i < cols.length; i++) {
+			if (!columns.hasOwnProperty(cols[i].name)) {
+				if (!(cols[i].name === idColName)) {
+					console.log('cols[i].name', cols[i].name)
+					if (columns[cols[i].name].indexOf('NUMBER') !== -1) {
+						const sql = 'ALTER TABLE ' + tablename + ' ADD ' + cols[i].name + ' INTEGER'
+						await executeSql(sql)
+					} else {
+						const sql = 'ALTER TABLE ' + tablename + ' ADD ' + cols[i].name + ' TEXT'
+						await executeSql(sql)
+					}
 				}
 			}
 		}
+	} catch (e) {
+		console.error("更新表，", tablename, "报错", e)
 	}
 }
+//同步表结构
 export async function updateInitTable() {
-	await openSqlite()
-	for (let i = 0; i < appConfig.entities.length; i++) {
-		await updateTable(appConfig.entities[i])
-		console.log('同步完成', appConfig.entities[i])
+	try {
+		await openSqlite()
+		for (let i = 0; i < appConfig.entities.length; i++) {
+			await updateTable(appConfig.entities[i])
+			console.log('同步完成', appConfig.entities[i])
+		}
+		await closedb()
+	} catch (e) {
+		console.error("同步表结构出错", e)
 	}
-	await closedb()
 
 }
 export async function openInitSqlite() {
@@ -556,12 +568,16 @@ export async function openInitSqlite() {
 	}
 }
 export async function initSqlite() {
-	let res = await getDBConfig({})
-	const tables = res.data
-	for (let table in tables) {
-		uni.setStorageSync(table, tables[table])
+	try {
+		let res = await getDBConfig({})
+		const tables = res.data
+		for (let table in tables) {
+			uni.setStorageSync(table, tables[table])
+		}
+		await openInitSqlite()
+	} catch (e) {
+		console.error("初始化出错", e)
 	}
-	await openInitSqlite()
 
 }
 export async function createTable(createTableName) {
@@ -595,5 +611,135 @@ export async function createTable(createTableName) {
 		console.log('创建成功', createTableName)
 	} catch (e) {
 		console.error("创建表出错", e)
+	}
+}
+export async function entityPartialSave(tableName, data) {
+	await openSqlite()
+	await entity(tableName, data)
+	await closedb()
+}
+export async function entity(tableName, data) {
+	try {
+		const table = uni.getStorageSync(tableName)
+		if (!table) {
+			console.error('表结构不存在', tableName)
+			return
+		}
+		const columns = table.columns
+		const idName = table.idName
+		const idType = table.idType
+		const idGenerator = table.idGenerator
+		delete data[idName]
+		const idValue = data[idName]
+		let id = ''
+		if (!idValue) {
+			id = await doInsert(tableName, columns, data, idGenerator, idName, idType)
+		} else {
+			await doUpdate(tableName, columns, data, idName, idType)
+		}
+		if (JSON.stringify(table.onetoone) !== '{}') {
+			for (let key in table.onetoone) {
+				const arr = appUtil.replaceMap(table.onetoone[key])
+				if (Array.isArray(data[key])) {
+					for (let i = 0; i < data[key].length; i++) {
+						const nextData = data[key][i]
+						nextData[arr[1]] = id
+						await entity(arr[0], nextData)
+					}
+				} else {
+					data[key][arr[1]] = id
+					await entity(arr[0], data[key])
+				}
+			}
+		}
+		if (JSON.stringify(table.onetomany) !== '{}') {
+			for (let key in table.onetomany) {
+				const arr = appUtil.replaceMap(table.onetomany[key])
+				if (Array.isArray(data[key])) {
+					for (let i = 0; i < data[key].length; i++) {
+						const nextData = data[key][i]
+						nextData[arr[1]] = id
+						await entity(arr[0], nextData)
+					}
+				} else {
+					data[key][arr[1]] = id
+					await entity(arr[0], data[key])
+				}
+			}
+		}
+		if (JSON.stringify(table.inverses) !== '{}') {
+			console.log('table.inverses', table.inverses)
+		}
+		if (JSON.stringify(table.inverseid) !== '{}') {
+			console.log('table.inverseid', table.inverseid)
+		}
+	} catch (e) {
+		//TODO handle the exception
+		console.log('entity出错', e)
+	}
+
+}
+export async function doInsert(tableName, columns, data, idGenerator, idName, idType) {
+	try {
+		let sql1 = 'insert into ' + tableName + '('
+		let sql2 = ') values('
+		let insertId
+		if (idGenerator === 'ID_GUID') {
+			insertId = appUtil.uuid()
+			sql1 += idName + ','
+			sql2 += idType === 'NUMBER' ? insertId : "'" + insertId + "'" + ","
+		} else if (idGenerator === 'ID_SEQ') {
+
+		} else if (idGenerator === 'ID_ASSIGNED') {
+			insertId = appUtil.uuid()
+			sql1 += idName + ','
+			sql2 += idType === 'NUMBER' ? insertId : "'" + insertId + "'" + ","
+		} else if (idGenerator === 'ID_FOREIGNER') {
+			insertId = appUtil.uuid()
+			sql1 += idName + ','
+			sql2 += idType === 'NUMBER' ? insertId : "'" + insertId + "'" + ","
+		}
+		for (let column in columns) {
+			if (data.hasOwnProperty(column)) {
+				sql1 += column + ','
+				if (data[column] === null || appUtil.replaceMap(columns[column])[1] === 'NUMBER') {
+					sql2 += `${data[column]},`
+				} else {
+					sql2 += `'${data[column]}',`
+				}
+			}
+		}
+		sql1 = sql1.substring(0, sql1.lastIndexOf(','))
+		sql2 = sql2.substring(0, sql2.lastIndexOf(',')) + ')'
+		var sql = sql1 + sql2
+		console.log('生成的insert', sql)
+		await executeSql(sql)
+		return insertId
+	} catch (e) {
+		//TODO handle the exception
+		console.log('插入表', tableName, '失败', e)
+	}
+
+}
+export async function doUpdate(tableName, columns, data, idName, idType) {
+	try {
+		let sql1 = 'update ' + tableName + ' set '
+		let sql2 = ` where ${idName}=${idType==='NUMBER'?data[idName]:"'"+data[idName]+"'"}`
+		for (let column in columns) {
+			if (data.hasOwnProperty(column)) {
+				if (data[column] === null || appUtil.replaceMap(columns[column])[1] === 'NUMBER') {
+					sql1 += `${column}=${data[column]},`
+				} else {
+					sql1 += `${column}='${data[column]}',`
+				}
+			}
+		}
+		sql1 = sql1.substring(0, sql1.lastIndexOf(','))
+		let sql = sql1 + sql2
+		console.log('生成的update', sql)
+		await executeSql(sql)
+	} catch (e) {
+		//TODO handle the exception
+		console.log('更新表', tableName, '失败', e)
 	}
 }
