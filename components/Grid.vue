@@ -1,15 +1,15 @@
 <template>
 	<view>
-		<u-grid :border="false" @click="click" col="2">
+		<u-grid :border="false" col="2">
 			<u-grid-item v-for="(baseListItem,baseListIndex) in baseList" :key="baseListIndex"
-				style="margin-top: 30rpx;">
+				style="margin-top: 30rpx;" @click="click(baseListItem)">
 				<view class="item-view">
 					<image src="../static/image/weixiudaiban.png" class="img"></image>
 					<text class="grid-text">{{baseListItem.name}}</text>
 				</view>
 			</u-grid-item>
 		</u-grid>
-		<u-toast ref="uToast" />
+		<!-- <u-toast ref="uToast" /> -->
 	</view>
 </template>
 
@@ -26,7 +26,7 @@
 		},
 		methods: {
 			click(name) {
-				this.$refs.uToast.success(`点击了第${name}个`)
+				this.$emit('navTo', name)
 			}
 		}
 	}

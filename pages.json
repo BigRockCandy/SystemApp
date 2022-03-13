@@ -8,8 +8,9 @@
 			"style": {
 				"navigationBarTitleText": "",
 				"enablePullDownRefresh": false,
+				"navigationBarBackgroundColor": "#F8F8F8",
 				// 去除导航栏
-				"navigationStyle":"custom"
+				"navigationStyle": "custom"
 			}
 
 		},
@@ -19,24 +20,34 @@
 				"navigationBarTitleText": "主页面",
 				// 禁止下拉刷新，非查询页面加上此配置
 				"enablePullDownRefresh": false,
-				"navigationBarTextStyle":"white",
-				"navigationBarBackgroundColor":"#3C9CFF"
+				"navigationBarBackgroundColor": "#3C9CFF",
+				"app-plus": {
+					"titleNView": {
+						"autoBackButton": false
+					}
+				}
 			}
 		},
-	    {
-            "path" : "pages/system/test",
-            "style" :                                                                                    
-            {
-                "navigationBarTitleText": "",
-                "enablePullDownRefresh": false
-            }
-            
-        }
-    ],
+		{
+			"path": "pages/system/test",
+			"style": {
+				"navigationBarTitleText": "",
+				"enablePullDownRefresh": false
+			}
+
+		}, {
+			"path": "pages/safecheck/currentCreate",
+			"style": {
+				"navigationBarTitleText": "安检待办",
+				"enablePullDownRefresh": false
+			}
+
+		}
+	],
 	"globalStyle": {
-		"navigationBarTextStyle": "black",
 		"navigationBarTitleText": "智能燃气终端",
-		"navigationBarBackgroundColor": "#F8F8F8",
+		"navigationBarBackgroundColor": "#3C9CFF",
+		"navigationBarTextStyle": "white",
 		"backgroundColor": "#F8F8F8"
 	}
 }

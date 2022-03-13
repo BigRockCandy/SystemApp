@@ -14,6 +14,9 @@
 			plus.navigator.setFullscreen(true)
 			plus.navigator.hideSystemNavigation()
 		},
+		onError: function(err) {
+			console.error(err)
+		}
 	}
 </script>
 

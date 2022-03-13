@@ -4,7 +4,7 @@
 			<view class="">
 				<view v-show="currentTab===index" v-for="(item,index) in phonetab" :key="index">
 					<!-- {{item.name}}组件预留位置 -->
-					<grid :baseList="item.children"></grid>
+					<grid :baseList="item.children" @navTo="navTo"></grid>
 				</view>
 			</view>
 
@@ -46,24 +46,35 @@
 			Grid
 		},
 		onLoad() {
-			this.baseList = this.phonetab ? this.phonetab[0].children : []
-			const testData = {
-				data: {
-					f_checker: 15130,
-					services: {
-						rows: []
+			try {
+				this.phonetab = uni.getStorageSync('user').functions
+				this.baseList = this.phonetab ? this.phonetab[0].children : []
+				const testData = {
+					data: {
+						f_checker: 15130,
+						services: {
+							rows: []
+						}
 					}
 				}
+				safeTimeOut(testData).then(res => {
+					const inserts = res.data.result.inserts
+					for (let i = 0; i < inserts.length; i++) {
+						// entityPartialSave('t_check_plan', inserts[i])
+					}
+				})
+			} catch (e) {
+				console.log(e)
 			}
-			safeTimeOut(testData).then(res => {
-				const inserts = res.data.result.inserts
-				for (let i = 0; i < inserts.length; i++) {
-					entityPartialSave('t_check_plan', inserts[i])
-				}
-			})
 
 		},
 		methods: {
+			navTo(baseListItem) {
+				console.log('9999999', baseListItem)
+				uni.navigateTo({
+					url: "../safecheck/currentCreate"
+				})
+			},
 			changeTab(item, index) {
 				this.currentTab = index
 				this.baseList = item.children
@@ -77,7 +88,7 @@
 			}
 		},
 		computed: {
-			...mapGetters(['phonetab']),
+			// ...mapGetters(['phonetab']),
 			...mapState(['user'])
 		}
 	}

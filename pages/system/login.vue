@@ -1,4 +1,3 @@
-<!-- 蓝色登录页面2 -->
 <template>
 	<view style="height:100vh;background: #fff;">
 		<view class="img-a">
@@ -49,8 +48,8 @@
 	export default {
 		data() {
 			return {
-				ename: '', //账号
-				password: '', //密码
+				ename: 'lpadmin', //账号
+				password: '1', //密码
 				disabled: false,
 				initSqllite: false
 			};
@@ -112,9 +111,11 @@
 				console.log(data)
 				this.disabled = true
 				userLogin(data).then(res => {
-					console.log('获取登陆信息：' + JSON.stringify(res.data))
-					this.setLoginUser(res.data)
-					this.setToken(res.data.id)
+					// console.log('获取登陆信息：' + JSON.stringify(res.data))
+					uni.setStorageSync('user', res.data)
+					// this.setLoginUser(res.data)
+					uni.setStorageSync('token', res.data.id)
+					// this.setToken(res.data.id)
 					vueConfig().then(result => {
 						this.setConfig(result.data)
 						this.disabled = false
