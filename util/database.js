@@ -629,7 +629,7 @@ export async function entity(tableName, data) {
 		const idName = table.idName
 		const idType = table.idType
 		const idGenerator = table.idGenerator
-		delete data[idName]
+		// delete data[idName]
 		const idValue = data[idName]
 		let id = ''
 		if (!idValue) {

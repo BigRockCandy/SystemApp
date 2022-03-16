@@ -11,3 +11,8 @@ export const appVersion = async (config = {}) => http.get('/phone/rs/dir/version
 export const vueConfig = async (config = {}) => http.get('/phone/rs/vue', config)
 
 export const safeTimeOut = async (params, config = {}) => http.post('/rs/logic/getCheckPlanChanged', params, config)
+
+export const dir2Xml = async (config = {}) => http.get('/phone/rs/dir2/noxml', config)
+
+export const dir2 = async (params, config = {}) => http.post('/phone/rs/dir2', params, config)
+

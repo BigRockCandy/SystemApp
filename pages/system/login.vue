@@ -33,7 +33,9 @@
 	import JSEncrypt from '../../util/jsencrypt.js'
 	import {
 		updateInitTable,
-		initSqlite
+		initSqlite,
+		selectSql,
+		openSqlite
 	} from "@/util/database";
 	import {
 		mapState,
@@ -42,7 +44,9 @@
 	import {
 		userLogin,
 		appVersion,
-		vueConfig
+		vueConfig,
+		dir2Xml,
+		dir2
 	} from '../../util/api'
 	import appConfig from '../../config/config.js'
 	export default {
@@ -63,18 +67,46 @@
 					const result = await appVersion()
 					console.log('服务器app版本', result.data.appVer)
 					if (appConfig.appVersion < result.data.appVer) {
+						this.initSqllite = true
 						await updateInitTable()
+						console.log('开始下载sql文件')
+						let res = await dir2Xml()
+						let ress = res.data.split('|').filter(item => item.indexOf('sqls/') !== -1).map(item => item
+							.substr(0, item.indexOf(',')))
+						for (let i = 0; i < ress.length; i++) {
+							const aa = await dir2(ress[i])
+							console.log(ress[i], '下载完成')
+							uni.setStorageSync(ress[i], aa.data)
+						}
+						console.log('sql文件下载完成')
+						this.initSqllite = false
 					} else {
 						console.log('版本相同不进行任何操作')
 					}
 				} else {
-					console.log('首次进入，开始初始化sqlite')
 					this.initSqllite = true
+					console.log('首次进入，开始初始化sqlite')
 					await initSqlite()
-					this.initSqllite = false
 					console.log('初始化sqlite完成')
+					console.log('开始下载sql文件')
+					let res = await dir2Xml()
+					let ress = res.data.split('|').filter(item => item.indexOf('sqls/') !== -1).map(item => item
+						.substr(0, item.indexOf(',')))
+					for (let i = 0; i < ress.length; i++) {
+						const aa = await dir2(ress[i])
+						console.log(ress[i], '下载完成')
+						uni.setStorageSync(ress[i], aa.data)
+					}
+					console.log('sql文件下载完成')
+					this.initSqllite = false
+
 					uni.setStorageSync('initLogin', true);
 				}
+				let ccc = uni.getStorageSync('sqls/提取安检计划.sql')
+				ccc = ccc.replace('{f_checker}', '梁平管理员').replace('{f_checker_id}', '15130').replace('{f_plan_year}',
+					'2022')
+				await openSqlite()
+				console.log('77777777', await selectSql(ccc))
 			} catch (e) {
 				console.log('初始化异常', e)
 			}

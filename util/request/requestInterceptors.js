@@ -19,7 +19,8 @@ module.exports = (vm) => {
 			}
 			// config.header.Token = vm.$store.state.token
 			if (config.url === '/phone/rs/vue') {
-				config.header.Token = vm.$store.state.token
+				config.header.Token = uni.getStorageSync('token')
+				// config.header.Token = vm.$store.state.token
 			}
 
 			// console.log('config', JSON.stringify(config))
