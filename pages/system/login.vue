@@ -102,11 +102,16 @@
 
 					uni.setStorageSync('initLogin', true);
 				}
-				let ccc = uni.getStorageSync('sqls/提取安检计划.sql')
-				ccc = ccc.replace('{f_checker}', '梁平管理员').replace('{f_checker_id}', '15130').replace('{f_plan_year}',
-					'2022')
-				await openSqlite()
-				console.log('77777777', await selectSql(ccc))
+				// let ccc = uni.getStorageSync('sqls/提取安检计划.sql')
+				// ccc = ccc.replace('{f_checker}', '梁平管理员').replace('{f_checker_id}', '15130').replace('{f_plan_year}',
+				// 	'2022')
+				// await openSqlite()
+				console.log('77777777', await this.$sql.query('提取安检计划', {
+					f_checker: '梁平管理员',
+					f_checker_id: '15130',
+					f_plan_year: '2022'
+				}))
+
 			} catch (e) {
 				console.log('初始化异常', e)
 			}

@@ -32,9 +32,6 @@
 	import {
 		safeTimeOut
 	} from '../../util/api'
-	import {
-		entityPartialSave
-	} from "@/util/database";
 	export default {
 		data() {
 			return {
@@ -60,7 +57,7 @@
 				safeTimeOut(testData).then(res => {
 					const inserts = res.data.result.inserts
 					for (let i = 0; i < inserts.length; i++) {
-						// entityPartialSave('t_check_plan', inserts[i])
+						this.$sql.entityPartialSave('t_check_plan', inserts[i])
 					}
 				})
 			} catch (e) {

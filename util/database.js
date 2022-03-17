@@ -7,7 +7,7 @@ import * as appUtil from './util.js'
 //打开数据库(创建数据库或者有该数据库就打开)
 var name = "safecheck" // 数据库名称
 // 防止数据中的 单引号 报错
-export function html2Escape(str) {
+export const html2Escape = (str) => {
 	// console.log("str",str,typeof str)
 	if (typeof str === "string") {
 		return str.replace(/'/g, "''");
@@ -18,7 +18,7 @@ export function html2Escape(str) {
 	}
 
 }
-export async function deleteAppTable() {
+export const deleteAppTable = async () => {
 	let tables = await getTable()
 	console.log('tables', tables)
 	for (let i = 0; i < tables.length; i++) {
@@ -28,7 +28,7 @@ export async function deleteAppTable() {
 	}
 
 }
-export async function openSqlite() {
+export const openSqlite = async () => {
 	//创建数据库或者打开
 	//这plus.sqlite只在手机上运行
 	return new Promise((resolve, reject) => {
@@ -53,7 +53,7 @@ export async function openSqlite() {
 	})
 }
 //判断数据库是否打开
-export function isOpen() {
+export const isOpen = () => {
 	//数据库打开了就返回true,否则返回false
 	var open = plus.sqlite.isOpenDatabase({
 		name,
@@ -62,7 +62,7 @@ export function isOpen() {
 	return open;
 }
 //关闭数据库
-export function closedb() {
+export const closedb = () => {
 	return new Promise((resolve, reject) => {
 		plus.sqlite.closeDatabase({
 			name,
@@ -76,7 +76,7 @@ export function closedb() {
 	})
 }
 // 执行sql语句
-export function executeSql(sql) {
+export const executeSql = (sql) => {
 	return new Promise((resolve, reject) => {
 		//创建表格在executeSql方法里写
 		// console.log("开始执行自定义sql", sql)
@@ -96,11 +96,11 @@ export function executeSql(sql) {
 	})
 }
 // 查询所有数据表名
-export async function getTable() {
+export const getTable = async () => {
 	return selectSql("select name FROM sqlite_master where type='table'")
 }
 // 获取表的所有字段
-export async function getAllField(tableName) {
+export const getAllField = async (tableName) => {
 	return selectSql(`PRAGMA table_info(${tableName})`)
 }
 
@@ -133,7 +133,7 @@ export const isTable = (tableName) => {
 }
 
 // 添加数据
-export async function addSql(tableName, obj = {}) {
+export const addSql = async (tableName, obj = {}) => {
 	if (Object.keys(obj).length > 0) {
 		// 获取数据库的字段
 		let fieldList = await getAllField(tableName)
@@ -157,7 +157,7 @@ export async function addSql(tableName, obj = {}) {
 
 
 // 修改数据
-export async function updateSql(tableName, setData, whereObj = {}) {
+export const updateSql = async (tableName, setData, whereObj = {}) => {
 	if (!Object.keys(whereObj).length) {
 		return new Promise((resolve, reject) => {
 			reject("请传whereObj")
@@ -190,7 +190,7 @@ export async function updateSql(tableName, setData, whereObj = {}) {
 }
 
 //删除数据库数据
-export async function deleteSql(tableName, whereObj = {}) {
+export const deleteSql = (tableName, whereObj = {}) => {
 	if (tableName && JSON.stringify(whereObj) !== '{}') {
 		let dataKeys = Object.keys(whereObj)
 		let setStr = ''
@@ -341,7 +341,7 @@ export const selectList = (tableName, searchObj = {}, orderBy = "") => {
 
 
 //将SQL语句进行拼接values(),()...然后再一次性插入，
-export async function insertAll(tableName = "", data = []) {
+export const insertAll = async (tableName = "", data = []) => {
 	let sql = ""
 	// 获取数据库的字段
 	try {
@@ -381,7 +381,7 @@ export async function insertAll(tableName = "", data = []) {
  * @param field 表主键字段，通常是 id
  * @returns {Promise<unknown>}
  */
-export async function batchUpdate(tableName = '', data = [], field = '') {
+export const batchUpdate = async (tableName = '', data = [], field = '') => {
 
 	let sql = ""
 	let con = [];
@@ -495,7 +495,7 @@ export const mergeSql = (name, tableName, tabs) => {
  * @param obj 数据
  * @returns []
  */
-export function intersection(fieldList = [], obj) {
+export const intersection = (fieldList = [], obj) => {
 	// 获取数据库的字段
 	let arrField = {}
 	for (let i in fieldList) {
@@ -512,7 +512,7 @@ export function intersection(fieldList = [], obj) {
 	return keys
 }
 //更新表结构
-export async function updateTable(tablename) {
+export const updateTable = async (tablename) => {
 	try {
 		const cols = await getAllField(tablename)
 		const table = uni.getStorageSync(tablename)
@@ -538,7 +538,7 @@ export async function updateTable(tablename) {
 	}
 }
 //同步表结构
-export async function updateInitTable() {
+export const updateInitTable = async () => {
 	try {
 		await openSqlite()
 		for (let i = 0; i < appConfig.entities.length; i++) {
@@ -551,7 +551,7 @@ export async function updateInitTable() {
 	}
 
 }
-export async function openInitSqlite() {
+export const openInitSqlite = async () => {
 	// 打开数据库
 	try {
 		await openSqlite()
@@ -567,7 +567,7 @@ export async function openInitSqlite() {
 		console.error("打开数据库，报错", e)
 	}
 }
-export async function initSqlite() {
+export const initSqlite = async () => {
 	try {
 		let res = await getDBConfig({})
 		const tables = res.data
@@ -580,7 +580,7 @@ export async function initSqlite() {
 	}
 
 }
-export async function createTable(createTableName) {
+export const createTable = async (createTableName) => {
 
 	const table = uni.getStorageSync(createTableName)
 	if (!table) {
@@ -613,12 +613,12 @@ export async function createTable(createTableName) {
 		console.error("创建表出错", e)
 	}
 }
-export async function entityPartialSave(tableName, data) {
+export const entityPartialSave = async (tableName, data) => {
 	await openSqlite()
 	await entity(tableName, data)
 	await closedb()
 }
-export async function entity(tableName, data) {
+export const entity = async (tableName, data) => {
 	try {
 		const table = uni.getStorageSync(tableName)
 		if (!table) {
@@ -679,7 +679,7 @@ export async function entity(tableName, data) {
 	}
 
 }
-export async function doInsert(tableName, columns, data, idGenerator, idName, idType) {
+export const doInsert = async (tableName, columns, data, idGenerator, idName, idType) => {
 	try {
 		let sql1 = 'insert into ' + tableName + '('
 		let sql2 = ') values('
@@ -721,7 +721,7 @@ export async function doInsert(tableName, columns, data, idGenerator, idName, id
 	}
 
 }
-export async function doUpdate(tableName, columns, data, idName, idType) {
+export const doUpdate = async (tableName, columns, data, idName, idType) => {
 	try {
 		let sql1 = 'update ' + tableName + ' set '
 		let sql2 = ` where ${idName}=${idType==='NUMBER'?data[idName]:"'"+data[idName]+"'"}`
@@ -741,5 +741,50 @@ export async function doUpdate(tableName, columns, data, idName, idType) {
 	} catch (e) {
 		//TODO handle the exception
 		console.log('更新表', tableName, '失败', e)
+	}
+}
+export const query = async (sqlName, data) => {
+	return new Promise((resolve, reject) => {
+		try {
+			const sql = uni.getStorageSync('sqls/' + sqlName + '.sql')
+			if (!sql) {
+				reject({
+					code: 500,
+					msg: 'sql不存在'
+				})
+			}
+
+			openSqlite()
+			replaceCondition(sql, data).then(res => {
+				resolve({
+					code: 200,
+					msg: res
+				})
+			})
+		} catch (e) {
+			reject({
+				code: 500,
+				msg: e
+			})
+		}
+	})
+}
+const replaceCondition = async (sql, data) => {
+	if (sql.indexOf('{') !== -1) {
+		if (sql.indexOf('}') !== -1) {
+			const restr = sql.substring(sql.indexOf('{'), sql.indexOf('}') + 1)
+			const key = restr.replace('{', '').replace('}', '').trim()
+			const restred = data[key]
+			if (restred) {
+				sql = sql.replace(restr, restred)
+				return replaceCondition(sql, data)
+			} else {
+				throw new Error(key + '不存在')
+			}
+		} else {
+			throw new Error('sql括号不匹配')
+		}
+	} else {
+		return selectSql(sql)
 	}
 }
