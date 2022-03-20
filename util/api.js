@@ -1,3 +1,4 @@
+import Vue from "vue"
 const {
 	http
 } = uni.$u
@@ -16,3 +17,9 @@ export const dir2Xml = async (config = {}) => http.get('/phone/rs/dir2/noxml', c
 
 export const dir2 = async (params, config = {}) => http.post('/phone/rs/dir2', params, config)
 
+export const load = async (methods, url, params, config = {}) => {
+	if (methods === 'GET') {
+		return http.get(url, config)
+	} else if (methods === 'POST')
+		return http.post(url, params, config)
+}

@@ -5,8 +5,10 @@ import Vuex from 'vuex'
 import store from './store/store'
 import * as appUtil from './util/util.js'
 // import *  from './util/database.js'
-const sql = require('./util/database.js')// 用法
+const sql = require('./util/database.js') // 用法
+// #ifdef APP-PLUS
 import "./util/JConsole.js";
+// #endif
 // import * as sql from './util/database.js'
 // 引入全局uView 
 import uView from '@/uni_modules/uview-ui'
